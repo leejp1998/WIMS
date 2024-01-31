@@ -54,7 +54,7 @@ class CustomSearchDelegate extends SearchDelegate<String> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No results found.'));
+          return const Center(child: Text('No results found.', style: TextStyle(fontSize: 18),));
         } else {
           results = snapshot.data!;
           return ListView.builder(

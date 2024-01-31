@@ -69,12 +69,13 @@ class _HomePageState extends State<HomePage> {
               // Handle sorting functionality
             },
           ),
-          IconButton(
-            icon: Icon(Icons.remove_circle_outline),
-            onPressed: () {
-              // Handle remove functionality
-            },
-          ),
+          // TODO: Add multiple removal in the future.
+          // IconButton(
+          //   icon: Icon(Icons.remove_circle_outline),
+          //   onPressed: () {
+          //     // Handle remove functionality
+          //   },
+          // ),
         ],
       ),
       body: items.isNotEmpty
@@ -130,6 +131,10 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Text(
                     'Welcome to Wims!',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Text(
+                    'Start adding your items!',
                     style: TextStyle(fontSize: 18),
                   ),
                   SizedBox(height: 20),
