@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:wims/formatter/text_input_formatter.dart';
 import 'package:wims/provider/category_provider.dart';
 
 import 'helper/database_helper.dart';
@@ -16,8 +17,6 @@ class _AddItemFormState extends State<AddItemForm> {
   String itemName = '';
   int itemCount = 0;
 
-  List<String> subcategories = ['Subcategory 1', 'Subcategory 2'];
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -32,6 +31,7 @@ class _AddItemFormState extends State<AddItemForm> {
               });
             },
             decoration: const InputDecoration(labelText: 'Item Name'),
+            inputFormatters: [CapitalizeWordsTextInputFormatter()],
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -91,9 +91,29 @@ class _AddItemFormState extends State<AddItemForm> {
               } else if (snapshot.hasError) {
                 // If there is an error with the Future, show an error message
                 return Text('Error: ${snapshot.error}');
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              } else if (categoryName.isEmpty) {
                 // If the Future has no data or empty data, show a message indicating no subcategories
                 return const Text('Select category to see subcategory option');
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return DropdownButtonFormField<String>(
+                  value: subcategoryName.isNotEmpty ? subcategoryName : null,
+                  items: const [
+                    DropdownMenuItem<String>(
+                      value: 'addNewSubcategory',
+                      child: Text('Add New Subcategory'),
+                    ),
+                  ],
+                  onChanged: (value) async {
+                    if (value == 'addNewSubcategory') {
+                      await _showAddSubCategoryDialog(context);
+                    } else {
+                      setState(() {
+                        subcategoryName = value!;
+                      });
+                    }
+                  },
+                  decoration: const InputDecoration(labelText: 'Subcategory'),
+                );
               } else {
                 // If the Future completes successfully and has data, build the dropdown menu
                 List<String> subcategories = snapshot.data as List<String>;
@@ -134,9 +154,21 @@ class _AddItemFormState extends State<AddItemForm> {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            onPressed: () {
-              // Implement logic to add the item to the database
-              // and close the bottom sheet
+            onPressed: () async {
+              // TODO: Add a case where image is added and image_id exists
+              if (itemName.isNotEmpty && itemCount > 0 && categoryName.isNotEmpty && subcategoryName.isNotEmpty) {
+                await DatabaseHelper.instance.insertItemWithCategoryAndSubcategory(
+                  itemName,
+                  itemCount,
+                  categoryName,
+                  subcategoryName,
+                );
+              } else if (itemName.isNotEmpty && itemCount > 0 && categoryName.isNotEmpty) {
+                await DatabaseHelper.instance.insertItemWithCategory(itemName, itemCount, categoryName);
+              } else if (itemName.isNotEmpty && itemCount > 0) {
+                await DatabaseHelper.instance.insertItem(itemName, itemCount);
+              }
+
               Navigator.pop(context);
             },
             child: const Text('Add Item'),
@@ -158,6 +190,7 @@ class _AddItemFormState extends State<AddItemForm> {
               newCategory = value;
             },
             decoration: InputDecoration(labelText: 'New Category'),
+            inputFormatters: [CapitalizeWordsTextInputFormatter()],
           ),
           actions: [
             TextButton(
@@ -171,12 +204,10 @@ class _AddItemFormState extends State<AddItemForm> {
                 // Insert the new category into the database
                 await DatabaseHelper.instance.insertNewCategory(newCategory);
 
-                // Reload categories from the database to update the dropdown
-                List<String> updatedCategories = await DatabaseHelper.instance.loadAllCategories();
-
                 // Update the dropdown items
                 setState(() {
                   categoryName = newCategory;
+                  subcategoryName = '';
                 });
 
                 Navigator.pop(context); // Close the dialog
@@ -201,6 +232,7 @@ class _AddItemFormState extends State<AddItemForm> {
               newSubcategory = value;
             },
             decoration: InputDecoration(labelText: 'New Subcategory'),
+            inputFormatters: [CapitalizeWordsTextInputFormatter()],
           ),
           actions: [
             TextButton(
@@ -213,9 +245,6 @@ class _AddItemFormState extends State<AddItemForm> {
               onPressed: () async {
                 // Insert the new category into the database
                 await DatabaseHelper.instance.insertNewSubcategory(newSubcategory, categoryName);
-
-                // Reload categories from the database to update the dropdown
-                List<String> updatedSubcategory = await DatabaseHelper.instance.loadAllSubcategories(categoryName);
 
                 // Update the dropdown items
                 setState(() {
