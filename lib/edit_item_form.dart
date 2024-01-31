@@ -183,25 +183,52 @@ class _EditItemFormState extends State<EditItemForm> {
           ElevatedButton(
             onPressed: () async {
               // Update item logic
-              if (itemName.isNotEmpty && itemCount > 0 && categoryName.isNotEmpty && subcategoryName.isNotEmpty) {
-                await DatabaseHelper.instance.updateItemWithCategoryAndSubcategory(
+              if (itemName.isNotEmpty &&
+                  itemCount > 0 &&
+                  categoryName.isNotEmpty &&
+                  subcategoryName.isNotEmpty) {
+                await DatabaseHelper.instance
+                    .updateItemWithCategoryAndSubcategory(
                   id,
                   itemName,
                   itemCount,
                   categoryName,
                   subcategoryName,
                 );
-              } else if (itemName.isNotEmpty && itemCount > 0 && categoryName.isNotEmpty) {
-                await DatabaseHelper.instance.updateItemWithCategory(id, itemName, itemCount, categoryName);
+              } else if (itemName.isNotEmpty &&
+                  itemCount > 0 &&
+                  categoryName.isNotEmpty) {
+                await DatabaseHelper.instance.updateItemWithCategory(
+                    id, itemName, itemCount, categoryName);
               } else if (itemName.isNotEmpty && itemCount > 0) {
-                await DatabaseHelper.instance.updateItem(id, itemName, itemCount);
+                await DatabaseHelper.instance
+                    .updateItem(id, itemName, itemCount);
               }
 
               Navigator.pop(context);
             },
             child: const Text('Update'),
           ),
-          ElevatedButton(onPressed: () {Navigator.pop(context);}, child: const Text('Cancel')),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await DatabaseHelper.instance.removeItem(id);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Remove'),
+                ),
+              ),
+              Expanded(
+                  child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel'))),
+            ],
+          ),
         ],
       ),
     );
@@ -273,7 +300,8 @@ class _EditItemFormState extends State<EditItemForm> {
             TextButton(
               onPressed: () async {
                 // Insert the new category into the database
-                await DatabaseHelper.instance.insertNewSubcategory(newSubcategory, categoryName);
+                await DatabaseHelper.instance
+                    .insertNewSubcategory(newSubcategory, categoryName);
 
                 // Update the dropdown items
                 setState(() {
@@ -294,7 +322,8 @@ class _EditItemFormState extends State<EditItemForm> {
     if (category.isEmpty) {
       return [];
     }
-    List<String> subcategories = await DatabaseHelper.instance.loadAllSubcategories(category);
+    List<String> subcategories =
+        await DatabaseHelper.instance.loadAllSubcategories(category);
     return subcategories;
   }
 }

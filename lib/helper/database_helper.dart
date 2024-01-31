@@ -347,4 +347,18 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  Future<void> removeItem(int id) async {
+    try {
+      Database db = await instance.database;
+
+      await db.delete(
+        tableItems,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      print('Error removing item: $e');
+    }
+  }
 }
