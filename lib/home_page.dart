@@ -115,6 +115,7 @@ class _HomePageState extends State<HomePage> {
           });
         },
         child: const Icon(Icons.add),
+        backgroundColor: Theme.of(context).highlightColor,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

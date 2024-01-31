@@ -32,10 +32,10 @@ class Wims extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Color primaryColor = const Color(0xFF6e6e6e);
-    Color primaryColorDark = const Color(0xFF3b3b3b);
-    Color highlightColor = const Color(0xFF845858);
-    Color primaryColorLight = const Color(0xFFa1a1a1);
+    Color primaryColor = const Color(0xFFd8c8b8);
+    Color primaryColorDark = const Color(0xFF8d7966);
+    Color highlightColor = const Color(0xFFE0ADAD);
+    Color primaryColorLight = const Color(0xFFe2ddd9);
 
     return MaterialApp(
       title: 'WIMS',
