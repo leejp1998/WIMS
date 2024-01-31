@@ -215,7 +215,7 @@ class DatabaseHelper {
       {
         DatabaseHelper.columnName: name,
         DatabaseHelper.columnCount: count,
-        DatabaseHelper.tableCategories: category,
+        DatabaseHelper.columnCategory: category,
       },
     );
   }
@@ -227,15 +227,30 @@ class DatabaseHelper {
       {
         DatabaseHelper.columnName: name,
         DatabaseHelper.columnCount: count,
-        DatabaseHelper.tableCategories: category,
-        DatabaseHelper.tableSubcategories: subcategory,
+        DatabaseHelper.columnCategory: category,
+        DatabaseHelper.columnSubcategory: subcategory,
+      },
+    );
+  }
+
+  Future<int> insertItemWithCategoryAndSubcategoryAndImage(String name, int count, String category, String subcategory, int imageId) async {
+    Database db = await instance.database;
+    return await db.insert(
+      DatabaseHelper.tableItems,
+      {
+        DatabaseHelper.columnName: name,
+        DatabaseHelper.columnCount: count,
+        DatabaseHelper.columnCategory: category,
+        DatabaseHelper.columnSubcategory: subcategory,
+        DatabaseHelper.columnImageId: imageId,
       },
     );
   }
 
   Future<void> insertNewCategory(String newCategory) async {
     Database db = await DatabaseHelper.instance.database;
-    await db.insert(DatabaseHelper.tableCategories, {DatabaseHelper.columnCategoryName: newCategory});
+    await db.insert(DatabaseHelper.tableCategories, {DatabaseHelper.columnCategoryName: newCategory}
+        , conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
   Future<void> insertNewSubcategory(String newSubcategory, String category) async {
@@ -243,7 +258,12 @@ class DatabaseHelper {
     await db.insert(DatabaseHelper.tableSubcategories, {
       DatabaseHelper.columnSubcategoryName: newSubcategory,
       DatabaseHelper.columnCategoryNameFk: category,
-    });
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+  }
+
+  Future<List<Map<String, dynamic>>> loadAllItems() async {
+    Database db = await database;
+    return await db.query(tableItems);
   }
 
   // Function to load categories from the database
@@ -264,5 +284,67 @@ class DatabaseHelper {
     List<String> resultList = result.map((category) => category[DatabaseHelper.columnSubcategoryName] as String).toList();
     resultList.sort((a, b) {return a.toString().toLowerCase().compareTo(b.toString().toLowerCase());});
     return resultList;
+  }
+
+  Future<int> updateItem(int id, String name, int count) async {
+    Database db = await instance.database;
+    Map<String, dynamic> updatedValues = {
+      'name': name,
+      'count': count,
+    };
+    return await db.update(
+      DatabaseHelper.tableItems,
+      updatedValues,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> updateItemWithCategory(int id, String name, int count, String category) async {
+    Database db = await instance.database;
+    Map<String, dynamic> updatedValues = {
+      'name': name,
+      'count': count,
+      'category': category,
+    };
+    return await db.update(
+      DatabaseHelper.tableItems,
+      updatedValues,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> updateItemWithCategoryAndSubcategory(int id, String name, int count, String category, String subcategory) async {
+    Database db = await instance.database;
+    Map<String, dynamic> updatedValues = {
+      'name': name,
+      'count': count,
+      'category': category,
+      'subcategory': subcategory,
+    };
+    return await db.update(
+      DatabaseHelper.tableItems,
+      updatedValues,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<int> updateItemWithCategoryAndSubcategoryAndImage(int id, String name, int count, String category, String subcategory, int imageId) async {
+    Database db = await instance.database;
+    Map<String, dynamic> updatedValues = {
+      'name': name,
+      'count': count,
+      'category': category,
+      'subcategory': subcategory,
+      'image_id': imageId,
+    };
+    return await db.update(
+      DatabaseHelper.tableItems,
+      updatedValues,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }
