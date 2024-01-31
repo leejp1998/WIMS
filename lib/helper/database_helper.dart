@@ -361,4 +361,24 @@ class DatabaseHelper {
       print('Error removing item: $e');
     }
   }
+
+  Future<List<Map<String, dynamic>>> searchItems(String query) async {
+    try {
+      // Get a reference to the database
+      Database db = await instance.database;
+
+      // Perform a case-insensitive search for items matching the query
+      List<Map<String, dynamic>> results = await db.query(
+        tableItems,
+        where: 'name LIKE ?',
+        whereArgs: ['%$query%'],
+      );
+
+      return results;
+    } catch (e) {
+      // Handle errors, e.g., print an error message
+      print('Error searching items: $e');
+      return [];
+    }
+  }
 }

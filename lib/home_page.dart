@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'add_item_form.dart';
 import 'edit_item_form.dart';
+import 'helper/custom_search_delegate.dart';
 import 'helper/database_helper.dart'; // Replace with your actual project name
 
 class HomePage extends StatefulWidget {
@@ -30,10 +31,21 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void editItemCallback() {
+    loadItems();
+  }
+
   Future<void> loadItems() async {
     items = await DatabaseHelper.instance.loadAllItems();
     // Rebuild the widget to display newly loaded items if any
     setState(() {});
+  }
+
+  void searchItems(String searchTerm) async {
+    List<Map<String, dynamic>> searchedItems = await DatabaseHelper.instance.searchItems(searchTerm);
+    setState(() {
+      items = searchedItems;
+    });
   }
 
   @override
@@ -41,6 +53,29 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('WIMS'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: CustomSearchDelegate(editItemCallback: editItemCallback),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.sort),
+            onPressed: () {
+              // Handle sorting functionality
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.remove_circle_outline),
+            onPressed: () {
+              // Handle remove functionality
+            },
+          ),
+        ],
       ),
       body: items.isNotEmpty
           ? ListView.builder(
@@ -126,7 +161,7 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return EditItemForm(selectedItem: selectedItem);
+        return EditItemForm(selectedItem: selectedItem, editItemCallback: editItemCallback,);
       },
     ).then((_) {
       // Reload items after adding a new item

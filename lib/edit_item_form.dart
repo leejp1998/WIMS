@@ -8,8 +8,9 @@ import 'helper/database_helper.dart';
 
 class EditItemForm extends StatefulWidget {
   final Map<String, dynamic> selectedItem;
+  final VoidCallback editItemCallback;
 
-  EditItemForm({required this.selectedItem});
+  EditItemForm({required this.selectedItem, required this.editItemCallback});
 
   @override
   _EditItemFormState createState() => _EditItemFormState();
@@ -204,6 +205,8 @@ class _EditItemFormState extends State<EditItemForm> {
                 await DatabaseHelper.instance
                     .updateItem(id, itemName, itemCount);
               }
+
+              widget.editItemCallback();
 
               Navigator.pop(context);
             },
