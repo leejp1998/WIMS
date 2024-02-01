@@ -46,13 +46,25 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  Future<void> loadItemsWithFilterCategory(
-      {required List<String> selectedCategories}) async {
-    items = await DatabaseHelper.instance
-        .loadItemsWithFilterCategory(selectedCategories: selectedCategories);
-    setState(() {});
+  void _handleOnTap(Map<String, dynamic> selectedItem) {
+    // Navigate to the edit page with the selected item data
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return EditItemForm(
+          selectedItem: selectedItem,
+          editItemCallback: editItemCallback,
+        );
+      },
+    ).then((_) {
+      // Reload items after adding a new item
+      loadItems();
+    });
   }
 
+  /*
+    Search Functionality
+   */
   void searchItems(String searchTerm) async {
     List<Map<String, dynamic>> searchedItems =
         await DatabaseHelper.instance.searchItems(searchTerm);
@@ -61,6 +73,9 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /*
+    Filter Functionalities
+   */
   void applyFilter() {
     filterCategories = [];
     filterCategories.addAll(selectedCategories);
@@ -69,6 +84,13 @@ class _HomePageState extends State<HomePage> {
     } else {
       loadItems();
     }
+  }
+
+  Future<void> loadItemsWithFilterCategory(
+      {required List<String> selectedCategories}) async {
+    items = await DatabaseHelper.instance
+        .loadItemsWithFilterCategory(selectedCategories: selectedCategories);
+    setState(() {});
   }
 
   void showFilterDialog() {
@@ -199,8 +221,8 @@ class _HomePageState extends State<HomePage> {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
-                  onLongPress: () {
-                    _handleLongPress(items[index]);
+                  onTap: () {
+                    _handleOnTap(items[index]);
                   },
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 4.0),
@@ -291,21 +313,5 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
-  }
-
-  void _handleLongPress(Map<String, dynamic> selectedItem) {
-    // Navigate to the edit page with the selected item data
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return EditItemForm(
-          selectedItem: selectedItem,
-          editItemCallback: editItemCallback,
-        );
-      },
-    ).then((_) {
-      // Reload items after adding a new item
-      loadItems();
-    });
   }
 }
