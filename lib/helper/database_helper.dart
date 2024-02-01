@@ -342,7 +342,7 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> updateItemWithCategoryAndSubcategory(int id, String name, int count, String category, String subcategory) async {
+  Future<int> updateItemWithCategoryAndSubcategory(int id, String name, int count, String category, String? subcategory) async {
     Database db = await instance.database;
     Map<String, dynamic> updatedValues = {
       'name': name,

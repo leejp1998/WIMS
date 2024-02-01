@@ -172,15 +172,16 @@ class _EditItemFormState extends State<EditItemForm> {
               }
             },
           ),
-          const SizedBox(height: 8),
+          const Spacer(),
+          //const SizedBox(height: 8),
           // Image picker section (implement as needed)
-          ElevatedButton(
-            onPressed: () {
-              // Implement image picker logic here
-            },
-            child: const Text('Pick Image'),
-          ),
-          const SizedBox(height: 8),
+          // ElevatedButton(
+          //   onPressed: () {
+          //     // Implement image picker logic here
+          //   },
+          //   child: const Text('Pick Image'),
+          // ),
+          //const SizedBox(height: 8),
           ElevatedButton(
             onPressed: () async {
               // Update item logic
@@ -199,8 +200,8 @@ class _EditItemFormState extends State<EditItemForm> {
               } else if (itemName.isNotEmpty &&
                   itemCount > 0 &&
                   categoryName.isNotEmpty) {
-                await DatabaseHelper.instance.updateItemWithCategory(
-                    id, itemName, itemCount, categoryName);
+                await DatabaseHelper.instance.updateItemWithCategoryAndSubcategory(
+                    id, itemName, itemCount, categoryName, null);
               } else if (itemName.isNotEmpty && itemCount > 0) {
                 await DatabaseHelper.instance
                     .updateItem(id, itemName, itemCount);
