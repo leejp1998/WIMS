@@ -144,15 +144,16 @@ class _AddItemFormState extends State<AddItemForm> {
               }
             },
           ),
-          const SizedBox(height: 8),
+          const Spacer(),
+          //const SizedBox(height: 8),
           // Image picker section (implement as needed)
-          ElevatedButton(
-            onPressed: () {
-              // Implement image picker logic here
-            },
-            child: const Text('Pick Image'),
-          ),
-          const SizedBox(height: 8),
+          // ElevatedButton(
+          //   onPressed: () {
+          //     // Implement image picker logic here
+          //   },
+          //   child: const Text('Pick Image'),
+          // ),
+          //const SizedBox(height: 8),
           ElevatedButton(
             onPressed: () async {
               // TODO: Add a case where image is added and image_id exists
@@ -172,6 +173,7 @@ class _AddItemFormState extends State<AddItemForm> {
               Navigator.pop(context);
             },
             child: const Text('Add Item'),
+
           ),
         ],
       ),
