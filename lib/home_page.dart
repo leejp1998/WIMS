@@ -45,14 +45,17 @@ class _HomePageState extends State<HomePage> {
     items = await DatabaseHelper.instance.loadAllItems();
     setState(() {});
   }
-  
-  Future<void> loadItemsWithFilterCategory({required List<String> selectedCategories}) async {
-    items = await DatabaseHelper.instance.loadItemsWithFilterCategory(selectedCategories: selectedCategories);
+
+  Future<void> loadItemsWithFilterCategory(
+      {required List<String> selectedCategories}) async {
+    items = await DatabaseHelper.instance
+        .loadItemsWithFilterCategory(selectedCategories: selectedCategories);
     setState(() {});
   }
 
   void searchItems(String searchTerm) async {
-    List<Map<String, dynamic>> searchedItems = await DatabaseHelper.instance.searchItems(searchTerm);
+    List<Map<String, dynamic>> searchedItems =
+        await DatabaseHelper.instance.searchItems(searchTerm);
     setState(() {
       items = searchedItems;
     });
@@ -63,74 +66,93 @@ class _HomePageState extends State<HomePage> {
     filterCategories.addAll(selectedCategories);
     if (filterCategories.isNotEmpty) {
       loadItemsWithFilterCategory(selectedCategories: filterCategories);
+    } else {
+      loadItems();
     }
   }
 
-  void loadAllCategories() async {
-    categories = await DatabaseHelper.instance.loadAllCategories();
-  }
-
   void showFilterDialog() {
-    loadAllCategories();
-
     showDialog(
       context: context,
       builder: (_) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              title: const Text('Filter Items'),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Select Categories:'),
-                  Wrap(
-                    children: categories.map((String category) {
-                      return FilterChip(
-                        label: Text(category),
-                        selected: selectedCategories.contains(category),
-                        onSelected: (bool selected) {
-                          setState(() {
-                            if (selected && !selectedCategories.contains(category)) {
-                              selectedCategories.add(category);
-                            } else {
-                              selectedCategories.remove(category);
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    setState(() {selectedCategories = [];});
+        return FutureBuilder<List<String>>(
+            future: DatabaseHelper.instance.loadAllCategories(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(
+                    child: Text(
+                  'No results found.',
+                  style: TextStyle(fontSize: 18),
+                ));
+              } else {
+                categories = snapshot.data!;
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return AlertDialog(
+                      title: const Text('Filter Items'),
+                      content: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Select Categories:'),
+                          Wrap(
+                            children: categories.map((String category) {
+                              return FilterChip(
+                                label: Text(category),
+                                selected: selectedCategories.contains(category),
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    if (selected &&
+                                        !selectedCategories
+                                            .contains(category)) {
+                                      selectedCategories.add(category);
+                                    } else {
+                                      selectedCategories.remove(category);
+                                    }
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              selectedCategories = [];
+                            });
+                          },
+                          child: const Text('Reset'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // Apply the filter and reload items
+                            applyFilter();
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Apply'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            setState(() {
+                              selectedCategories = [];
+                              selectedCategories.addAll(filterCategories);
+                            });
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                      ],
+                    );
                   },
-                  child: const Text('Reset'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Apply the filter and reload items
-                    applyFilter();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Apply'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Close the filter dialog without applying
-                    setState(() {selectedCategories = []; selectedCategories.addAll(filterCategories);});
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancel'),
-                ),
-              ],
-            );
-          },
-        );
+                );
+              }
+            });
       },
     );
   }
@@ -146,7 +168,8 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               showSearch(
                 context: context,
-                delegate: CustomSearchDelegate(editItemCallback: editItemCallback),
+                delegate:
+                    CustomSearchDelegate(editItemCallback: editItemCallback),
               );
             },
           ),
@@ -183,7 +206,8 @@ class _HomePageState extends State<HomePage> {
                     margin: const EdgeInsets.symmetric(vertical: 4.0),
                     color: Theme.of(context).primaryColorLight,
                     child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16.0),
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -198,12 +222,14 @@ class _HomePageState extends State<HomePage> {
                           if (items[index]['category'] != null)
                             Text(
                               '${items[index]['category']}',
-                              style: const TextStyle(fontSize: 12, color: Colors.black54),
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black54),
                             ),
                           if (items[index]['subcategory'] != null)
                             Text(
                               '${items[index]['subcategory']}',
-                              style: const TextStyle(fontSize: 12, color: Colors.black38),
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black38),
                             ),
                         ],
                       ),
@@ -218,33 +244,35 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             )
-          : selectedCategories.isEmpty ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Welcome to Wims!',
-                    style: TextStyle(fontSize: 18),
+          : filterCategories.isEmpty
+              ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Welcome to Wims!',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Start adding your items!',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      SizedBox(height: 20),
+                    ],
                   ),
-                  Text(
-                    'Start adding your items!',
-                    style: TextStyle(fontSize: 18),
+                )
+              : const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'No item found meeting the filter criteria!',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      SizedBox(height: 20),
+                    ],
                   ),
-                  SizedBox(height: 20),
-                ],
-              ),
-            ) : const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'No item found meeting the filter criteria!',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-          ],
-        ),
-      ),
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Show item form when button is pressed
@@ -270,7 +298,10 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return EditItemForm(selectedItem: selectedItem, editItemCallback: editItemCallback,);
+        return EditItemForm(
+          selectedItem: selectedItem,
+          editItemCallback: editItemCallback,
+        );
       },
     ).then((_) {
       // Reload items after adding a new item
