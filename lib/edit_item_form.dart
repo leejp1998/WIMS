@@ -326,7 +326,7 @@ class _EditItemFormState extends State<EditItemForm> {
       return [];
     }
     List<String> subcategories =
-        await DatabaseHelper.instance.loadAllSubcategories(category);
+        await DatabaseHelper.instance.loadAllSubcategoriesWithCategory(category);
     return subcategories;
   }
 }

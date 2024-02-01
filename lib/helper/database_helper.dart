@@ -275,7 +275,15 @@ class DatabaseHelper {
     return resultList;
   }
 
-  Future<List<String>> loadAllSubcategories(String category) async {
+  Future<List<String>> loadAllSubcategories() async {
+    Database db = await DatabaseHelper.instance.database;
+    List<Map<String, dynamic>> result = await db.query(DatabaseHelper.tableSubcategories);
+    List<String> resultList = result.map((sub) => sub[DatabaseHelper.columnSubcategoryName] as String).toList();
+    resultList.sort((a, b) {return a.toString().toLowerCase().compareTo(b.toString().toLowerCase());});
+    return resultList;
+  }
+
+  Future<List<String>> loadAllSubcategoriesWithCategory(String category) async {
     Database db = await DatabaseHelper.instance.database;
     List<Map<String, dynamic>> result = await db.query(
         DatabaseHelper.tableSubcategories,
@@ -283,6 +291,25 @@ class DatabaseHelper {
         whereArgs: [category]);
     List<String> resultList = result.map((category) => category[DatabaseHelper.columnSubcategoryName] as String).toList();
     resultList.sort((a, b) {return a.toString().toLowerCase().compareTo(b.toString().toLowerCase());});
+    return resultList;
+  }
+
+  Future<List<String>> loadAllSubcategoriesWithCategories(List<String> categories) async {
+    Database db = await DatabaseHelper.instance.database;
+
+    String query =
+        'SELECT ${DatabaseHelper.columnSubcategoryName} FROM ${DatabaseHelper.tableSubcategories} WHERE ${DatabaseHelper.columnCategoryNameFk} IN (${categories.map((_) => '?').join(',')})';
+
+    List<Map<String, dynamic>> result = await db.rawQuery(query, categories);
+    List<String> resultList = result
+        .map((subcategory) =>
+    subcategory[DatabaseHelper.columnSubcategoryName] as String)
+        .toList();
+
+    resultList.sort((a, b) {
+      return a.toString().toLowerCase().compareTo(b.toString().toLowerCase());
+    });
+
     return resultList;
   }
 
@@ -380,5 +407,14 @@ class DatabaseHelper {
       print('Error searching items: $e');
       return [];
     }
+  }
+
+  Future<List<Map<String, dynamic>>> loadItemsWithFilterCategory({required List<String> selectedCategories}) async {
+    Database db = await DatabaseHelper.instance.database;
+
+    String query = 'SELECT * FROM items WHERE category IN (${selectedCategories.map((_) => '?').join(',')})';
+    List<Map<String, dynamic>> result = await db.rawQuery(query, selectedCategories);
+
+    return result;
   }
 }

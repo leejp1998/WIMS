@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'add_item_form.dart';
 import 'edit_item_form.dart';
@@ -15,6 +16,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late List<Map<String, dynamic>> items;
+  List<String> categories = [];
+  List<String> subcategories = [];
+  List<String> selectedCategories = [];
+  List<String> filterCategories = [];
+  List<String> selectedSubcategories = [];
 
   final _longPressGestureRecognizer = LongPressGestureRecognizer();
 
@@ -37,7 +43,11 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> loadItems() async {
     items = await DatabaseHelper.instance.loadAllItems();
-    // Rebuild the widget to display newly loaded items if any
+    setState(() {});
+  }
+  
+  Future<void> loadItemsWithFilterCategory({required List<String> selectedCategories}) async {
+    items = await DatabaseHelper.instance.loadItemsWithFilterCategory(selectedCategories: selectedCategories);
     setState(() {});
   }
 
@@ -48,6 +58,83 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void applyFilter() {
+    filterCategories = [];
+    filterCategories.addAll(selectedCategories);
+    if (filterCategories.isNotEmpty) {
+      loadItemsWithFilterCategory(selectedCategories: filterCategories);
+    }
+  }
+
+  void loadAllCategories() async {
+    categories = await DatabaseHelper.instance.loadAllCategories();
+  }
+
+  void showFilterDialog() {
+    loadAllCategories();
+
+    showDialog(
+      context: context,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text('Filter Items'),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Select Categories:'),
+                  Wrap(
+                    children: categories.map((String category) {
+                      return FilterChip(
+                        label: Text(category),
+                        selected: selectedCategories.contains(category),
+                        onSelected: (bool selected) {
+                          setState(() {
+                            if (selected && !selectedCategories.contains(category)) {
+                              selectedCategories.add(category);
+                            } else {
+                              selectedCategories.remove(category);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {selectedCategories = [];});
+                  },
+                  child: const Text('Reset'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Apply the filter and reload items
+                    applyFilter();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Apply'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Close the filter dialog without applying
+                    setState(() {selectedCategories = []; selectedCategories.addAll(filterCategories);});
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +142,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text('WIMS'),
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: () {
               showSearch(
                 context: context,
@@ -64,7 +151,13 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.sort),
+            icon: const Icon(Icons.filter_alt),
+            onPressed: () {
+              showFilterDialog();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.sort),
             onPressed: () {
               // Handle sorting functionality
             },
@@ -125,7 +218,7 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             )
-          : const Center(
+          : selectedCategories.isEmpty ? const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -140,7 +233,18 @@ class _HomePageState extends State<HomePage> {
                   SizedBox(height: 20),
                 ],
               ),
+            ) : const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'No item found meeting the filter criteria!',
+              style: TextStyle(fontSize: 18),
             ),
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Show item form when button is pressed

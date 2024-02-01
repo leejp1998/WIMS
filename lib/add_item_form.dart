@@ -265,7 +265,7 @@ class _AddItemFormState extends State<AddItemForm> {
     if (category.isEmpty) {
       return [];
     }
-    List<String> subcategories = await DatabaseHelper.instance.loadAllSubcategories(category);
+    List<String> subcategories = await DatabaseHelper.instance.loadAllSubcategoriesWithCategory(category);
     return subcategories;
   }
 }
