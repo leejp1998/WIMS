@@ -8,7 +8,7 @@ import 'helper/database_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  bool isDebugMode = true;
+  bool isDebugMode = false;
   assert(isDebugMode = true);
 
   if (isDebugMode) {

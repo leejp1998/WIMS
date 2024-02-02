@@ -78,7 +78,7 @@ class DatabaseHelper {
   static Database? _database;
   Future<Database> get database async {
     // Uncomment this after debugging
-    // if (_database != null) return _database!;
+    if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
@@ -140,7 +140,7 @@ class DatabaseHelper {
 
   // Function to create the database tables
   Future<void> _onCreate(Database db, int version) async {
-    bool isDebugMode = true;
+    bool isDebugMode = false;
     assert(isDebugMode = true);
 
     if (isDebugMode) {
