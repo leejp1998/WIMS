@@ -5,7 +5,16 @@ import 'package:sqflite/sqflite.dart';
 import 'add_item_form.dart';
 import 'edit_item_form.dart';
 import 'helper/custom_search_delegate.dart';
-import 'helper/database_helper.dart'; // Replace with your actual project name
+import 'helper/database_helper.dart';
+
+enum SortingOption {
+  nameAscending,
+  nameDescending,
+  countAscending,
+  countDescending,
+  categoryAscending,
+  categoryDescending,
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,6 +24,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  SortingOption selectedSortOption = SortingOption.nameAscending;
   late List<Map<String, dynamic>> items;
   List<String> categories = [];
   List<String> subcategories = [];
@@ -179,6 +189,64 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  /*
+    Sort functionalities
+   */
+  void onSortOptionSelected(SortingOption option) {
+    setState(() {
+      selectedSortOption = option;
+      sortItems();
+    });
+  }
+
+  void sortItems() {
+    switch (selectedSortOption) {
+      case SortingOption.nameAscending:
+        items = List<Map<String, dynamic>>.from(items)
+          ..sort((a, b) => a['name'].compareTo(b['name']));
+        break;
+      case SortingOption.nameDescending:
+        items = List<Map<String, dynamic>>.from(items)
+          ..sort((a, b) => b['name'].compareTo(a['name']));
+        break;
+      case SortingOption.countAscending:
+        items = List<Map<String, dynamic>>.from(items)
+          ..sort((a, b) => a['count'].compareTo(b['count']));
+        break;
+      case SortingOption.countDescending:
+        items = List<Map<String, dynamic>>.from(items)
+          ..sort((a, b) => b['count'].compareTo(a['count']));
+        break;
+      case SortingOption.categoryAscending:
+        items = List<Map<String, dynamic>>.from(items)
+          ..sort((a, b) => a['category'].compareTo(b['category']));
+        break;
+      case SortingOption.categoryDescending:
+        items = List<Map<String, dynamic>>.from(items)
+          ..sort((a, b) => b['category'].compareTo(a['category']));
+        break;
+    }
+
+    setState(() {});
+  }
+
+  String getSortingOptionLabel(SortingOption option) {
+    switch (option) {
+      case SortingOption.nameAscending:
+        return 'Name (A-Z)';
+      case SortingOption.nameDescending:
+        return 'Name (Z-A)';
+      case SortingOption.countAscending:
+        return 'Count (Ascending)';
+      case SortingOption.countDescending:
+        return 'Count (Descending)';
+      case SortingOption.categoryAscending:
+        return 'Category (A-Z)';
+      case SortingOption.categoryDescending:
+        return 'Category (Z-A)';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,10 +269,16 @@ class _HomePageState extends State<HomePage> {
               showFilterDialog();
             },
           ),
-          IconButton(
+          PopupMenuButton<SortingOption>(
+            onSelected: onSortOptionSelected,
             icon: const Icon(Icons.sort),
-            onPressed: () {
-              // Handle sorting functionality
+            itemBuilder: (BuildContext context) {
+              return SortingOption.values.map((option) {
+                return PopupMenuItem<SortingOption>(
+                  value: option,
+                  child: Text(getSortingOptionLabel(option)),
+                );
+              }).toList();
             },
           ),
           // TODO: Add multiple removal in the future.
