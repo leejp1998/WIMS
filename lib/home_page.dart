@@ -60,10 +60,18 @@ class _HomePageState extends State<HomePage> {
     // Navigate to the edit page with the selected item data
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        return EditItemForm(
-          selectedItem: selectedItem,
-          editItemCallback: editItemCallback,
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: FractionallySizedBox(
+            heightFactor: 0.75,
+            child: EditItemForm(
+              selectedItem: selectedItem,
+              editItemCallback: editItemCallback,
+            ),
+          ),
         );
       },
     ).then((_) {
@@ -374,8 +382,16 @@ class _HomePageState extends State<HomePage> {
           // Show item form when button is pressed
           showModalBottomSheet(
             context: context,
+            isScrollControlled: true,
             builder: (BuildContext context) {
-              return AddItemForm();
+              return Padding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                child: FractionallySizedBox(
+                  heightFactor: 0.75, // Adjust the fraction as needed
+                  child: AddItemForm(), // Replace with your form widget
+                ),
+              );
             },
           ).then((_) {
             // Reload items after adding a new item
