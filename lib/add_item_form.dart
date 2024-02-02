@@ -48,7 +48,18 @@ class _AddItemFormState extends State<AddItemForm> {
             future: DatabaseHelper.instance.loadAllCategories(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
+                return DropdownButtonFormField<String>(
+                  value: null,
+                  items: const [
+                    DropdownMenuItem<String>(
+                      value: 'addNewCategory',
+                      child: Text('Add New Category'),
+                    ),
+                  ],
+                  onTap: () => {FocusScope.of(context).requestFocus(FocusNode())},
+                  onChanged: (value) => {},
+                  decoration: const InputDecoration(labelText: 'Category'),
+                );
               } else if (snapshot.hasError) {
                 return const Text('Error loading categories');
               } else {
@@ -66,9 +77,8 @@ class _AddItemFormState extends State<AddItemForm> {
                       child: Text('Add New Category'),
                     ),
                   ],
-                  onTap: () => {FocusScope.of(context).requestFocus(new FocusNode())},
+                  onTap: () => {FocusScope.of(context).requestFocus(FocusNode())},
                   onChanged: (value) async {
-                    FocusScope.of(context).requestFocus(new FocusNode());
                     if (value == 'addNewCategory') {
                       await _showAddCategoryDialog(context);
                     } else {
@@ -88,13 +98,10 @@ class _AddItemFormState extends State<AddItemForm> {
             future: fetchSubcategories(categoryName),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                // While the Future is still running, show a loading indicator
-                return CircularProgressIndicator();
+                return const Text('Select category to see subcategory option');
               } else if (snapshot.hasError) {
-                // If there is an error with the Future, show an error message
                 return Text('Error: ${snapshot.error}');
               } else if (categoryName.isEmpty) {
-                // If the Future has no data or empty data, show a message indicating no subcategories
                 return const Text('Select category to see subcategory option');
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return DropdownButtonFormField<String>(
@@ -105,9 +112,8 @@ class _AddItemFormState extends State<AddItemForm> {
                       child: Text('Add New Subcategory'),
                     ),
                   ],
-                  onTap: () => {FocusScope.of(context).requestFocus(new FocusNode())},
+                  onTap: () => {FocusScope.of(context).requestFocus(FocusNode())},
                   onChanged: (value) async {
-                    FocusScope.of(context).requestFocus(new FocusNode());
                     if (value == 'addNewSubcategory') {
                       await _showAddSubCategoryDialog(context);
                     } else {
@@ -134,6 +140,7 @@ class _AddItemFormState extends State<AddItemForm> {
                       child: Text('Add New Subcategory'),
                     ),
                   ],
+                  onTap: () => {FocusScope.of(context).requestFocus(FocusNode())},
                   onChanged: (value) async {
                     if (value == 'addNewSubcategory') {
                       await _showAddSubCategoryDialog(context);
