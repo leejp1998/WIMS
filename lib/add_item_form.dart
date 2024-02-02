@@ -66,7 +66,9 @@ class _AddItemFormState extends State<AddItemForm> {
                       child: Text('Add New Category'),
                     ),
                   ],
+                  onTap: () => {FocusScope.of(context).requestFocus(new FocusNode())},
                   onChanged: (value) async {
+                    FocusScope.of(context).requestFocus(new FocusNode());
                     if (value == 'addNewCategory') {
                       await _showAddCategoryDialog(context);
                     } else {
@@ -103,7 +105,9 @@ class _AddItemFormState extends State<AddItemForm> {
                       child: Text('Add New Subcategory'),
                     ),
                   ],
+                  onTap: () => {FocusScope.of(context).requestFocus(new FocusNode())},
                   onChanged: (value) async {
+                    FocusScope.of(context).requestFocus(new FocusNode());
                     if (value == 'addNewSubcategory') {
                       await _showAddSubCategoryDialog(context);
                     } else {
@@ -121,10 +125,10 @@ class _AddItemFormState extends State<AddItemForm> {
                   value: subcategoryName.isNotEmpty ? subcategoryName : null,
                   items: [
                     for (String subcategory in subcategories)
-                    DropdownMenuItem<String>(
-                      value: subcategory,
-                      child: Text(subcategory),
-                    ),
+                      DropdownMenuItem<String>(
+                        value: subcategory,
+                        child: Text(subcategory),
+                      ),
                     const DropdownMenuItem<String>(
                       value: 'addNewSubcategory',
                       child: Text('Add New Subcategory'),
@@ -157,15 +161,22 @@ class _AddItemFormState extends State<AddItemForm> {
           ElevatedButton(
             onPressed: () async {
               // TODO: Add a case where image is added and image_id exists
-              if (itemName.isNotEmpty && itemCount > 0 && categoryName.isNotEmpty && subcategoryName.isNotEmpty) {
-                await DatabaseHelper.instance.insertItemWithCategoryAndSubcategory(
+              if (itemName.isNotEmpty &&
+                  itemCount > 0 &&
+                  categoryName.isNotEmpty &&
+                  subcategoryName.isNotEmpty) {
+                await DatabaseHelper.instance
+                    .insertItemWithCategoryAndSubcategory(
                   itemName,
                   itemCount,
                   categoryName,
                   subcategoryName,
                 );
-              } else if (itemName.isNotEmpty && itemCount > 0 && categoryName.isNotEmpty) {
-                await DatabaseHelper.instance.insertItemWithCategory(itemName, itemCount, categoryName);
+              } else if (itemName.isNotEmpty &&
+                  itemCount > 0 &&
+                  categoryName.isNotEmpty) {
+                await DatabaseHelper.instance
+                    .insertItemWithCategory(itemName, itemCount, categoryName);
               } else if (itemName.isNotEmpty && itemCount > 0) {
                 await DatabaseHelper.instance.insertItem(itemName, itemCount);
               }
@@ -173,7 +184,6 @@ class _AddItemFormState extends State<AddItemForm> {
               Navigator.pop(context);
             },
             child: const Text('Add Item'),
-
           ),
         ],
       ),
@@ -246,7 +256,8 @@ class _AddItemFormState extends State<AddItemForm> {
             TextButton(
               onPressed: () async {
                 // Insert the new category into the database
-                await DatabaseHelper.instance.insertNewSubcategory(newSubcategory, categoryName);
+                await DatabaseHelper.instance
+                    .insertNewSubcategory(newSubcategory, categoryName);
 
                 // Update the dropdown items
                 setState(() {
@@ -267,7 +278,8 @@ class _AddItemFormState extends State<AddItemForm> {
     if (category.isEmpty) {
       return [];
     }
-    List<String> subcategories = await DatabaseHelper.instance.loadAllSubcategoriesWithCategory(category);
+    List<String> subcategories = await DatabaseHelper.instance
+        .loadAllSubcategoriesWithCategory(category);
     return subcategories;
   }
 }
